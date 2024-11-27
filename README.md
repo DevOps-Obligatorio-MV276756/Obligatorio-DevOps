@@ -1,7 +1,11 @@
-IMAGEN ORT
----
-# Universidad ORT Uruguay | Facultad de ingeniería | Escuela de tecnología - DevOps | Obligatorio
 
+<p align = "center">
+<img src = "images/ORT.png" width=100%>
+</p>
+
+---
+
+# Universidad ORT Uruguay | Facultad de ingeniería | Escuela de tecnología - DevOps | Obligatorio
 
 ## Documento Readme Obligatorio
 
@@ -10,10 +14,16 @@ IMAGEN ORT
 # Indice
 
 1
+
 2
+
 3
+
 4
+
 5
+
+# Estructura
 
 # Presentacion del problema
 
@@ -21,24 +31,37 @@ Lorem ipsum
 
 # Solucion Planteada
 
-Lorem ipsum
+A continuación se detalla la solución presentada.
 
 ## Herramientas y Proveedores
 
 Como herramientas a utlizar se seleccionaron las siguientes:
 
- - **Herramienta de Git**: GitHub
- - **Herramienta de CI/CD**: GitHub Actions
- - **Orquestador**: AWS ECS
- - **Proveedor de Cloud**: AWS
- - **Herramienta de Testing de Código Estático**: SonarCloud
- - **Herramienta de Prueba extra**:
- - **Aplicación FE a buildear y desplegar**: Vue
- - **Servicio Serverless**:
+**Herramienta de Git**: GitHub
+
+**Herramienta de CI/CD**: GitHub Actions
+
+**Orquestador**: AWS ECS
+
+**Proveedor de Cloud**: AWS
+
+**Herramienta de Testing de Código Estático**: SonarCloud
+
+**Herramienta de Prueba extra**: Podman
+
+**Aplicación FE a buildear y desplegar**: Vue
+
+**Servicio Serverless**:
 
 ## Tablero Kanban
 
-Lorem ipsum
+Se maneja un tablero kanban para documentar el trayecto continuo del proyecto.
+
+### Presentación visual
+
+<p align = "center">
+<img src = "images/kanban_example.png" width=100%>
+</p>
 
 ## Repositorios
 
@@ -50,61 +73,13 @@ Para el manejo del repositorio de DevOps se va a utilizar un flujo Trunk based. 
 
 #### Diagrama de flujo
 
-![enter image description here](https://softwareskill.pl/wp-content/uploads/2022/06/trunk-based-development-release-branch-e1656332842126-1024x478.png)
+<p align = "center">
+<img src = "https://softwareskill.pl/wp-content/uploads/2022/06/trunk-based-development-release-branch-e1656332842126-1024x478.png" width=100%>
+</p>
 
 ### Repositorio MicroServicios
 
-Para el repositorio donde se hospedarán los MicroServicios se decide por el uso del flujo GitFlow
+Para el repositorio donde se hospedarán los MicroServicios se decide por el uso del flujo GitFlow. Permitiendo mantener una rama estable para cada ambiente manejado (prod/main, dev, test), con su respectiva lógica de CI/CD
 
 #### Diagrama de flujo
 
-
-## SmartyPants
-
-SmartyPants converts ASCII punctuation characters into "smart" typographic punctuation HTML entities. For example:
-
-|                |ASCII                          |HTML                         |
-|----------------|-------------------------------|-----------------------------|
-|Single backticks|`'Isn't this fun?'`            |'Isn't this fun?'            |
-|Quotes          |`"Isn't this fun?"`            |"Isn't this fun?"            |
-|Dashes          |`-- is en-dash, --- is em-dash`|-- is en-dash, --- is em-dash|
-
-
-## KaTeX
-
-You can render LaTeX mathematical expressions using [KaTeX](https://khan.github.io/KaTeX/):
-
-The *Gamma function* satisfying $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$ is via the Euler integral
-
-$$
-\Gamma(z) = \int_0^\infty t^{z-1}e^{-t}dt\,.
-$$
-
-> You can find more information about **LaTeX** mathematical expressions [here](http://meta.math.stackexchange.com/questions/5020/mathjax-basic-tutorial-and-quick-reference).
-
-
-## UML diagrams
-
-You can render UML diagrams using [Mermaid](https://mermaidjs.github.io/). For example, this will produce a sequence diagram:
-
-```mermaid
-sequenceDiagram
-Alice ->> Bob: Hello Bob, how are you?
-Bob-->>John: How about you John?
-Bob--x Alice: I am good thanks!
-Bob-x John: I am good thanks!
-Note right of John: Bob thinks a long<br/>long time, so long<br/>that the text does<br/>not fit on a row.
-
-Bob-->Alice: Checking with John...
-Alice->John: Yes... John, how are you?
-```
-
-And this will produce a flow chart:
-
-```mermaid
-graph LR
-A[Square Rect] -- Link text --> B((Circle))
-A --> C(Round Rect)
-B --> D{Rhombus}
-C --> D
-```

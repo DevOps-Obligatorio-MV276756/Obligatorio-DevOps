@@ -171,21 +171,67 @@ jobs:
     needs: build_docker_image_target_ecr
     runs-on: ubuntu-latest
     steps:
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-east-1
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-    - name: Download task definition
-      run: |
-        aws ecs describe-task-definition --task-definition ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }} --query taskDefinition > task-definition.json
-    - name: Deploy Amazon ECS task definition
-      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
-      with:
-        task-definition: task-definition.json
-        service: ${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
-        cluster: ${{ env.CALLEE_BRANCH2 }}-cluster
-        wait-for-service-stability: true
-      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+    # - name: Download task definition
+    #   run: |
+    #     aws ecs describe-task-definition --task-definition ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }} --query taskDefinition > task-definition.json
+    # - name: Deploy Amazon ECS task definition
+    #   uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+    #   with:
+    #     task-definition: task-definition.json
+    #     service: ${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
+    #     cluster: ${{ env.CALLEE_BRANCH2 }}-cluster
+    #     wait-for-service-stability: true
+    
+    # Extraido de ChatGPT | Prompt: I want to run aECS Service Update (Rolling Deployment) but first create the service itself through github actions
+      - name: Register ECS Task Definition
+        run: |
+          CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
+          SERVICE_NAME=${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
+          IMAGE_URI=555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
+
+          TASK_DEFINITION=$(aws ecs register-task-definition \
+            --family $SERVICE_NAME \
+            --container-definitions "[{\"name\":\"my-container\",\"image\":\"$IMAGE_URI\",\"memory\":512,\"cpu\":256,\"essential\":true}]" \
+            --query 'taskDefinition.taskDefinitionArn' \
+            --output text)
+
+          echo "Task Definition ARN: $TASK_DEFINITION"
+      - name: Create ECS Service
+        run: |
+          CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
+          SERVICE_NAME=${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
+          TASK_DEFINITION_ARN=${{ steps.register-task-definition.outputs.TASK_DEFINITION }}
+
+          SERVICE_EXISTS=$(aws ecs describe-services --cluster $CLUSTER_NAME --services $SERVICE_NAME --query 'services[0].serviceName' --output text)
+
+          if [ "$SERVICE_EXISTS" == "None" ]; then
+            echo "Service does not exist. Creating service..."
+            aws ecs create-service \
+              --cluster $CLUSTER_NAME \
+              --service-name $SERVICE_NAME \
+              --task-definition $TASK_DEFINITION_ARN \
+              --desired-count 1 \
+              --launch-type FARGATE
+          else
+            echo "Service exists. Skipping service creation."
+          fi
+      - name: Update ECS Service
+        run: |
+          CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
+          SERVICE_NAME=${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
+          TASK_DEFINITION_ARN=${{ steps.register-task-definition.outputs.TASK_DEFINITION }}
+
+          # Update ECS service with the new task definition
+          aws ecs update-service \
+            --cluster $CLUSTER_NAME \
+            --service $SERVICE_NAME \
+            --task-definition $TASK_DEFINITION_ARN \
+            --force-new-deployment \
+            --desired-count 1

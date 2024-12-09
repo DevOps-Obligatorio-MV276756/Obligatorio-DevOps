@@ -72,7 +72,7 @@ jobs:
         run: | 
           gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Orders
           mvn -f Obligatorio-BE-Orders/ -B package
-          java -jar Obligatorio-BE-Orders/target/obligatorio-be-orders.jar --server.port=8000 &
+          java -jar Obligatorio-BE-Orders/target/obligatorio-be-orders.jar http://localhost:8001 http://localhost:8003 http://localhost:8002 --server.port=8000 &
           gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Payments
           mvn -f Obligatorio-BE-Payments/ -B package
           java -jar Obligatorio-BE-Payments/target/obligatorio-be-payments.jar --server.port=8001 &

@@ -25,12 +25,25 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Deploying application to Amazon S3
-        uses: lewandy/vue-s3-deployer@main
+      # - name: Deploying application to Amazon S3
+      #   uses: lewandy/vue-s3-deployer@main
+      #   with:
+      #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     AWS_DEFAULT_REGION: us-east-1
+      #     AWS_BUCKET_NAME: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
+      #     APP_SOURCE_CODE: ./
+      #     BUILD_COMMAND: "npm run build"
+      - name: Build
+        run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-1
-          AWS_BUCKET_NAME: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
-          APP_SOURCE_CODE: ./
-          BUILD_COMMAND: "npm run build"
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+      - name: Upload dist to S3 bucket
+        run: aws s3 sync ./dist/ ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}

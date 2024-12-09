@@ -72,16 +72,16 @@ jobs:
         run: | 
           gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-orders
           mvn -f obligatorio-be-orders/ -B package
-          java -jar obligatorio-be-orders/target/obligatorio-be-orders.jar http://localhost:8001 http://localhost:8003 http://localhost:8002 --server.port=8000 &
+          java -jar obligatorio-be-orders/target/obligatorio-be-orders-0.0.1-SNAPSHOT-spring-boot.jar http://localhost:8001 http://localhost:8003 http://localhost:8002 --server.port=8000 &
           gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-payments
           mvn -f obligatorio-be-payments/ -B package
-          java -jar obligatorio-be-payments/target/obligatorio-be-payments.jar --server.port=8001 &
+          java -jar obligatorio-be-payments/target/obligatorio-be-payments-0.0.1-SNAPSHOT-spring-boot.jar --server.port=8001 &
           gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-products
           mvn -f obligatorio-be-products/ -B package
-          java -jar obligatorio-be-products/target/obligatorio-be-products.jar --server.port=8002 &
+          java -jar obligatorio-be-products/target/obligatorio-be-products-0.0.1-SNAPSHOT-spring-boot.jar --server.port=8002 &
           gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-shipping
           mvn -f obligatorio-be-shipping/ -B package
-          java -jar obligatorio-be-shipping/target/obligatorio-be-shipping.jar --server.port=8003 &
+          java -jar obligatorio-be-shipping/target/obligatorio-be-shipping-0.0.1-SNAPSHOT-spring-boot.jar --server.port=8003 &
       
       - name: Obtener Postman collection a travez de GitHub REST API 
         run: |
@@ -151,7 +151,7 @@ jobs:
       - name: Push image to AWS ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 555867651264.dkr.ecr.us-east-1.amazonaws.com
-          docker build --build-arg JAR_FILE=${{ env.CALLEE_NAME }}.jar -t ${{ env.CALLEE_NAME }} . --file dockerfile_jar
+          docker build --build-arg JAR_FILE=${{ env.CALLEE_NAME }}-0.0.1-SNAPSHOT-spring-boot.jar -t ${{ env.CALLEE_NAME }} . --file dockerfile_jar
           docker tag ${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }} 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
           docker push 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
   # Haciendo uso de https://github.com/aws-actions/amazon-ecs-deploy-task-definition

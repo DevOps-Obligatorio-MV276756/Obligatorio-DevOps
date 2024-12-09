@@ -5,8 +5,8 @@ on:
 
 env:
   CALLEE_NAME: ${{ github.event.repository.name }}
-  CALLEE_BRANCH: ${{ github.event.repository.ref_name }}
-  CALLEE_BRANCH2: ${{ github.event.repository.base_ref }}
+  # CALLEE_BRANCH: ${{ github.event.repository.ref_name }}
+  CALLEE_BRANCH2: ${{ github.event.pull_request.base.ref }}
 
 jobs:
   # Modificado de https://github.com/SonarSource/sonarcloud-github-action-samples

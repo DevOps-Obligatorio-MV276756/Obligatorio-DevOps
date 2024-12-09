@@ -7,7 +7,7 @@ env:
   CALLEE_NAME: ${{ github.event.repository.name }}
   # CALLEE_BRANCH: ${{ github.event.repository.ref_name }}
   CALLEE_BRANCH2: ${{ github.event.pull_request.base.ref }}
-  GH_TOKEN: ${{ secrets.GH_ACC_TOKEN }}
+  GH_TOKEN: ${{ github.token }}
 
 jobs:
   # Modificado de https://github.com/SonarSource/sonarcloud-github-action-samples
@@ -71,7 +71,7 @@ jobs:
       - name: Obtener Postman collection a travez de GitHub REST API 
         run: |
           curl \
-          -H "Authorization: Bearer ${{ secrets.GH_ACC_TOKEN }}" \
+          -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
           -H 'Accept: application/vnd.github.v3.raw' \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           -O \
@@ -131,7 +131,7 @@ jobs:
       - name: Obtener Dockerfile a travez de GitHub REST API 
         run: |
           curl \
-          -H "Authorization: Bearer ${{ secrets.GH_ACC_TOKEN }}" \
+          -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
           -H 'Accept: application/vnd.github.v3.raw' \
           -H "X-GitHub-Api-Version: 2022-11-28" \
           -O \

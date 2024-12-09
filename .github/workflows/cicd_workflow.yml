@@ -26,18 +26,18 @@ jobs:
           # Usaba originalmente ver 11 pero la doc solicita ver 17 https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven/
           java-version: 17
           distribution: 'temurin'
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+      # - name: Cache Maven packages
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: ~/.m2
+      #     key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+      #     restore-keys: ${{ runner.os }}-m2
+      # - name: Cache SonarCloud packages
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: ~/.sonar/cache
+      #     key: ${{ runner.os }}-sonar
+      #     restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
         env:
@@ -79,18 +79,18 @@ jobs:
       
       - name: Building environment
         run: | 
-          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Orders
-          mvn -f Obligatorio-BE-Orders/ -B package
-          java -jar Obligatorio-BE-Orders/target/obligatorio-be-orders.jar http://localhost:8001 http://localhost:8003 http://localhost:8002 --server.port=8000 &
-          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Payments
-          mvn -f Obligatorio-BE-Payments/ -B package
-          java -jar Obligatorio-BE-Payments/target/obligatorio-be-payments.jar --server.port=8001 &
-          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Products
-          mvn -f Obligatorio-BE-Products/ -B package
-          java -jar Obligatorio-BE-Products/target/obligatorio-be-products.jar --server.port=8002 &
-          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Shipping
-          mvn -f Obligatorio-BE-Shipping/ -B package
-          java -jar Obligatorio-BE-Shipping/target/obligatorio-be-shipping.jar --server.port=8003 &
+          gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-orders
+          mvn -f obligatorio-be-orders/ -B package
+          java -jar obligatorio-be-orders/target/obligatorio-be-orders.jar http://localhost:8001 http://localhost:8003 http://localhost:8002 --server.port=8000 &
+          gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-payments
+          mvn -f obligatorio-be-payments/ -B package
+          java -jar obligatorio-be-payments/target/obligatorio-be-payments.jar --server.port=8001 &
+          gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-products
+          mvn -f obligatorio-be-products/ -B package
+          java -jar obligatorio-be-products/target/obligatorio-be-products.jar --server.port=8002 &
+          gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-shipping
+          mvn -f obligatorio-be-shipping/ -B package
+          java -jar obligatorio-be-shipping/target/obligatorio-be-shipping.jar --server.port=8003 &
       - name: "Run tests"
         run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme > runreport1.html"
       - name: "Publish report"

@@ -205,8 +205,9 @@ jobs:
             --network-mode awsvpc \
             --requires-compatibilities FARGATE \
             --cpu "256" \
+            --memory "512" \
+            --execution-role-arn arn:aws:iam::555867651264:role/LabRole\
             --query 'taskDefinition.taskDefinitionArn' \
-            --memory "512"
             --output text)
 
           echo "Task Definition ARN: $TASK_DEFINITION"

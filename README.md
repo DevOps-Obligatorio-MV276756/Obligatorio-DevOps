@@ -47,11 +47,11 @@ Como herramientas a utlizar se seleccionaron las siguientes:
 
 **Herramienta de Testing de Código Estático**: SonarCloud
 
-**Herramienta de Prueba extra**: Podman
+**Herramienta de Prueba extra**: Postman
 
 **Aplicación FE a buildear y desplegar**: Vue
 
-**Servicio Serverless**:
+**Servicio Serverless**: S3 Bucket
 
 ## Tablero Kanban
 
@@ -65,7 +65,7 @@ Se maneja un tablero kanban para documentar el trayecto continuo del proyecto.
 
 ## Repositorios
 
-Se decide diseñar una estructura de 2 repositorios. Un repositorio para almacenar los microservicios y uno para todo lo orientado a DevOps.
+Se decide diseñar una estructura de 6 repositorios. Cuatro repositorios para almacenar los microservicios, uno para el FrontEnd y uno para todo lo orientado a DevOps.
 
 ### Repositorio DevOps
 
@@ -77,9 +77,29 @@ Para el manejo del repositorio de DevOps se va a utilizar un flujo Trunk based. 
 <img src = "https://softwareskill.pl/wp-content/uploads/2022/06/trunk-based-development-release-branch-e1656332842126-1024x478.png" width=100%>
 </p>
 
-### Repositorio MicroServicios
+### Repositorios de MicroServicios y Frontend
 
-Para el repositorio donde se hospedarán los MicroServicios se decide por el uso del flujo GitFlow. Permitiendo mantener una rama estable para cada ambiente manejado (prod/main, dev, test), con su respectiva lógica de CI/CD
+Para los repositorios donde se hospedarán los MicroServicios y el repositorio del FrontEnd se decide por el uso del flujo GitFlow. Permitiendo mantener una rama estable para cada ambiente manejado (prod/main, dev, test), con su respectiva lógica de CI/CD.
+En este caso se decide utilizar tres ramas estables. Main, que actua como la rama donde se almacena el código desplegable en producción. Dev, donde se almacena el código desplegable en el ambiente de desarrollo. Y por último, Test, donde se almacena el código desplegable en el ambiente de testing.
 
 #### Diagrama de flujo
 
+<p align = "center">
+<img src = "images/gitflow.png" width=100%>
+</p>
+
+## CI/CD
+
+### Análisis de código estático
+
+Para el análisis de código estático se decide hacer uso de SonarCloud.
+
+### Build
+
+#### MicroSevices
+
+#### FrontEnd
+
+### Análisis de servicios
+
+### Deploy

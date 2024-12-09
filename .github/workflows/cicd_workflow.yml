@@ -94,14 +94,9 @@ jobs:
       
       - name: "Run tests"
         run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme > runreport1.html"
+      - name: "Output report"
+        run: echo "report=$(cat runreport1)" >> $GITHUB_OUTPUT
       - name: "Publish report"
-        # uses: MeilCli/slack-upload-file@v4
-        # with:
-        #   slack_token: ${{ secrets.SLACK_TOKEN }}
-        #   channel_id: 'C0846DR504B'
-        #   file_path: 'runreport1.html'
-        #   file_name: 'postmanReport.html'
-        #   file_type: 'html'
         uses: MeilCli/slack-upload-file@v4
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
@@ -129,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
-          path: target/${{ env.CALLEE_NAME }}.jar
+          path: target/${{ env.CALLEE_NAME }}-0.0.1-SNAPSHOT-spring-boot.jar
 
   build_docker_image_target_ecr:
     name: Crear imagen de docker y hacer push a AWS ECR

@@ -140,6 +140,8 @@ jobs:
           -H "X-GitHub-Api-Version: 2022-11-28" \
           -O \
           -L 'https://api.github.com/repos/DevOps-Obligatorio-MV276756/Obligatorio-DevOps/contents/dockerfiles/dockerfile_jar'
+      - name: Verify Dockerfile is downloaded
+        run: ls -l dockerfile_jar
       - name: Descargar artefacto del MS empaquetado
         uses: actions/download-artifact@v4
         with:

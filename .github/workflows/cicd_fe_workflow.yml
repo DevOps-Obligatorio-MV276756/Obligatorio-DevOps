@@ -46,4 +46,4 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       - name: Upload dist to S3 bucket
-        run: aws s3 sync ./dist/ ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
+        run: aws s3 sync ./dist/ s3://${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }} --delete

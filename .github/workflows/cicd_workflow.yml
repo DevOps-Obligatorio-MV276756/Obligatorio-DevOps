@@ -96,7 +96,7 @@ jobs:
         run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme"
       - name: "Output report"
         run: |
-          ls -l runreport1.html
+          ls -l htmlreport.html
       - name: "Publish report"
         uses: MeilCli/slack-upload-file@v4
         with:

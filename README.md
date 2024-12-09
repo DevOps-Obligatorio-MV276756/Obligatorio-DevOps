@@ -277,6 +277,15 @@ Para el FE, el buildeo es más simple, descargamos las dependencias de la aplica
 
 Para el despliegue de los MS se descarga primero el task definition acorde al repositorio y ambiente para luego desplegar un service con esa definición haciendo uso del action `aws-actions/amazon-ecs-deploy-task-definition`
 
+Esto no resulto por falta de establecer los services de antemano. Por ello se vio necesario hacer uso de ChatGPT para obtener una solucion a esta problematica.
+Se solicitó una manera de crear un service al momento de desplegar así evitar el error que la anterior solución tiraba.
+Los prompts usados para encontrar esta solucion fueron los siguientes:
+
+* Prompt 1: I want to run aECS Service Update (Rolling Deployment) but first create the service itself through github actions
+* Prompt 2: The code you gave me above is not filling task_definition_arn with ${{ steps.register-task-definition.outputs.TASK_DEFINITION }} 
+* Prompt 3: the argument TASK_DEFINITION_ARN is still being passed as empty
+* Prompt 4: An error occurred (InvalidParameterException) when calling the UpdateService operation: Task definition does not support launch_type FARGATE.
+
 #### FrontEnd
 
 Por el lado del FE se decidio en un principio hacer uso del action `lewandy/vue-s3-deployer`, cual afirmaba hacer todos los pasos requeridos de una manera eficiente y organizada. Lamentablemente, luego de investigación al no funcionar al correr el workflow, ese action resultó no funcional desde finales de Septiembre sin aparente interes en darle solución.

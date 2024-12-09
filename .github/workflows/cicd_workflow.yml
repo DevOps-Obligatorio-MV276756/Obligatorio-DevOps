@@ -98,10 +98,10 @@ jobs:
         uses: MeilCli/slack-upload-file@v4
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
+          channel_id: 'C0846DR504B'
           file_path: 'runreport1.html'
           file_name: 'postmanReport.html'
           file_type: 'html'
-          channel_id: 'C0846DR504B'
       
   package_artifact:
     name: Empaquetar proyecto y subirlo como artefacto

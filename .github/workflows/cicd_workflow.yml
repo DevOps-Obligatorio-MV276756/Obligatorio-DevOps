@@ -67,15 +67,6 @@ jobs:
         run: "npm install -g newman"
       - name: "Install Newman reporter"
         run: "npm install -g newman-reporter-htmlextra"
-
-      - name: Obtener Postman collection a travez de GitHub REST API 
-        run: |
-          curl \
-          -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
-          -H 'Accept: application/vnd.github.v3.raw' \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          -O \
-          -L 'https://api.github.com/repos/DevOps-Obligatorio-MV276756/Obligatorio-DevOps/contents/postman/obligatorio-devops.postman_collection'
       
       - name: Building environment
         run: | 
@@ -91,6 +82,16 @@ jobs:
           gh repo clone DevOps-Obligatorio-MV276756/obligatorio-be-shipping
           mvn -f obligatorio-be-shipping/ -B package
           java -jar obligatorio-be-shipping/target/obligatorio-be-shipping.jar --server.port=8003 &
+      
+      - name: Obtener Postman collection a travez de GitHub REST API 
+        run: |
+          curl \
+          -H "Authorization: Bearer ${{ env.GH_TOKEN }}" \
+          -H 'Accept: application/vnd.github.v3.raw' \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -O \
+          -L 'https://api.github.com/repos/DevOps-Obligatorio-MV276756/Obligatorio-DevOps/contents/postman/obligatorio-devops.postman_collection.json'
+      
       - name: "Run tests"
         run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme > runreport1.html"
       - name: "Publish report"

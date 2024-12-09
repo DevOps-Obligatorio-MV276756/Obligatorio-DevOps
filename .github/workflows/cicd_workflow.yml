@@ -106,11 +106,9 @@ jobs:
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           channel_id: 'C0846DR504B'
-          content: 'file content'
-          file_type: 'html'
-          file_name: 'runreport1.html'
-          title: 'Reporte workflow'
+          file_path: 'runreport1.html'
           initial_comment: 'Post by slack-upload-file'
+          if_no_files_found: warn
       
   package_artifact:
     name: Empaquetar proyecto y subirlo como artefacto

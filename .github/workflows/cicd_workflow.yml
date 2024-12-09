@@ -95,13 +95,13 @@ jobs:
       - name: "Run tests"
         run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme > runreport1.html"
       - name: "Publish report"
-        uses: MeilCli/slack-upload-file@v1
+        uses: MeilCli/slack-upload-file@v4
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
           file_path: 'runreport1.html'
           file_name: 'postmanReport.html'
           file_type: 'html'
-          channels: 'obligatorio'
+          channel_id: 'C0846DR504B'
       
   package_artifact:
     name: Empaquetar proyecto y subirlo como artefacto

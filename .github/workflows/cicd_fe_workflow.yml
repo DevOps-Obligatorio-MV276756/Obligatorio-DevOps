@@ -1,0 +1,36 @@
+name: CI/CD FrontEnd Workflow
+
+on:
+  workflow_call:
+
+env:
+  CALLEE_NAME: ${{ github.event.repository.name }}
+  CALLEE_BRANCH: ${{ github.event.repository.ref_name }}
+  CALLEE_BRANCH2: ${{ github.event.repository.base_ref }}
+
+jobs:
+  # Hago uso del action https://github.com/marketplace/actions/github-action-for-deploy-vue-app-to-amazon-s3-bucket
+  build_and_deploy:
+    name: Buildea projecto FE y lo sube al s3 bucket
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploying application to Amazon S3
+        uses: lewandy/vue-s3-deployer@main
+        with:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          AWS_BUCKET_NAME: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
+          APP_SOURCE_CODE: ./
+          BUILD_COMMAND: "npm run build"

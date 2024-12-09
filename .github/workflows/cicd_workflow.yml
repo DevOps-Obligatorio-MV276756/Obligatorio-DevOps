@@ -1,0 +1,169 @@
+name: CI WorkFlow
+
+on:
+  workflow_call:
+
+env:
+  CALLEE_NAME: ${{ github.event.repository.name }}
+  CALLEE_BRANCH: ${{ github.event.repository.ref_name }}
+  CALLEE_BRANCH2: ${{ github.event.repository.base_ref }}
+
+jobs:
+  # Modificado de https://github.com/SonarSource/sonarcloud-github-action-samples
+  build_sonarcloud_testing:
+    name: Buildear proyecto para test con sonarcloud
+    runs-on: ubuntu-latest
+    steps:
+      # Muevo de v2 a v4
+      - uses: actions/checkout@v4
+        with:
+          # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          # Usaba originalmente ver 11 pero la doc solicita ver 17 https://docs.sonarsource.com/sonarqube-cloud/advanced-setup/ci-based-analysis/sonarscanner-for-maven/
+          java-version: 17
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Build and analyze
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Pcoverage
+        env:
+          # Needed to get some information about the pull request, if any
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # SonarCloud access token should be generated from https://sonarcloud.io/account/security/
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  postman_testing:
+    # https://afsalbacker.medium.com/a-simple-api-test-automation-setup-using-newman-github-actions-and-slack-f70cfa15efe3
+    name: Test extra con postman
+    needs: build_sonarcloud_testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "18"
+      - name: "Install Newman"
+        run: "npm install -g newman"
+      - name: "Install Newman reporter"
+        run: "npm install -g newman-reporter-htmlextra"
+
+      - name: Obtener Postman collection a travez de GitHub REST API 
+        run: |
+          curl \
+          -H "Authorization: Bearer ${{ secrets.GH_ACC_TOKEN }}" \
+          -H 'Accept: application/vnd.github.v3.raw' \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -O \
+          -L 'https://api.github.com/repos/DevOps-Obligatorio-MV276756/Obligatorio-DevOps/contents/postman/obligatorio-devops.postman_collection'
+      
+      - name: Building environment
+        run: | 
+          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Orders
+          mvn -f Obligatorio-BE-Orders/ -B package
+          java -jar Obligatorio-BE-Orders/target/obligatorio-be-orders.jar --server.port=8000 &
+          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Payments
+          mvn -f Obligatorio-BE-Payments/ -B package
+          java -jar Obligatorio-BE-Payments/target/obligatorio-be-payments.jar --server.port=8001 &
+          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Products
+          mvn -f Obligatorio-BE-Products/ -B package
+          java -jar Obligatorio-BE-Products/target/obligatorio-be-products.jar --server.port=8002 &
+          gh repo clone DevOps-Obligatorio-MV276756/Obligatorio-BE-Shipping
+          mvn -f Obligatorio-BE-Shipping/ -B package
+          java -jar Obligatorio-BE-Shipping/target/obligatorio-be-shipping.jar --server.port=8003 &
+      - name: "Run tests"
+        run: "newman run obligatorio-devops.postman_collection.json -r htmlextra --reporter-htmlextra-export htmlreport.html --reporter-htmlextra-darkTheme > runreport1.html"
+      - name: "Publish report"
+        uses: MeilCli/slack-upload-file@v1
+        with:
+          slack_token: ${{ secrets.SLACK_TOKEN }}
+          file_path: 'runreport1.html'
+          file_name: 'postmanReport.html'
+          file_type: 'html'
+          channels: 'obligatorio'
+      
+  package_artifact:
+    name: Empaquetar proyecto y subirlo como artefacto
+    needs: postman_testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+      - name: Package
+        run: |
+          mvn clean
+          mvn package
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
+          path: target/${{ env.CALLEE_NAME }}.jar
+
+  build_docker_image_target_ecr:
+    name: Crear imagen de docker y hacer push a AWS ECR
+    needs: package_artifact
+    runs-on: ubuntu-latest
+    steps:
+      - name: Obtener Dockerfile a travez de GitHub REST API 
+        run: |
+          curl \
+          -H "Authorization: Bearer ${{ secrets.GH_ACC_TOKEN }}" \
+          -H 'Accept: application/vnd.github.v3.raw' \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          -O \
+          -L 'https://api.github.com/repos/DevOps-Obligatorio-MV276756/Obligatorio-DevOps/contents/dockerfiles/dockerfile_jar'
+      - name: Descargar artefacto del MS empaquetado
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }}
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: us-east-1
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+      - name: Push image to AWS ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 555867651264.dkr.ecr.us-east-1.amazonaws.com
+          docker build --build-arg JAR_FILE=${{ env.CALLEE_NAME }}.jar -t ${{ env.CALLEE_NAME }} . --file dockerfile_jar
+          docker tag ${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }} 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
+          docker push 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
+  # Haciendo uso de https://github.com/aws-actions/amazon-ecs-deploy-task-definition
+  download_task_deploy_ecs_service:
+    name: Descargar task de AWS y desplegar el service
+    needs: build_docker_image_target_ecr
+    runs-on: ubuntu-latest
+    steps:
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: us-east-1
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+    - name: Download task definition
+      run: |
+        aws ecs describe-task-definition --task-definition ${{ env.CALLEE_NAME }}-${{ env.CALLEE_BRANCH2 }} --query taskDefinition > task-definition.json
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+      with:
+        task-definition: task-definition.json
+        service: ${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
+        cluster: ${{ env.CALLEE_BRANCH2 }}-cluster
+        wait-for-service-stability: true
+      

@@ -190,8 +190,9 @@ jobs:
     #     wait-for-service-stability: true
     
     # Extraido de ChatGPT | Prompt 1: I want to run aECS Service Update (Rolling Deployment) but first create the service itself through github actions
-    # Promt 2: The code you gave me above is not filling task_definition_arn with ${{ steps.register-task-definition.outputs.TASK_DEFINITION }} 
+    # Prompt 2: The code you gave me above is not filling task_definition_arn with ${{ steps.register-task-definition.outputs.TASK_DEFINITION }} 
     # Prompt 3: the argument TASK_DEFINITION_ARN is still being passed as empty
+    # Prompt 4: An error occurred (InvalidParameterException) when calling the UpdateService operation: Task definition does not support launch_type FARGATE.
       - name: Register ECS Task Definition
         run: |
           CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
@@ -200,8 +201,12 @@ jobs:
 
           TASK_DEFINITION=$(aws ecs register-task-definition \
             --family $SERVICE_NAME \
-            --container-definitions "[{\"name\":\"my-container\",\"image\":\"$IMAGE_URI\",\"memory\":512,\"cpu\":256,\"essential\":true}]" \
+            --container-definitions "[{\"name\":\"${{ env.CALLEE_NAME }}\",\"image\":\"$IMAGE_URI\",\"memory\":512,\"cpu\":256,\"essential\":true}]" \
+            --network-mode awsvpc \
+            --requires-compatibilities FARGATE \
+            --cpu "256" \
             --query 'taskDefinition.taskDefinitionArn' \
+            --memory "512"
             --output text)
 
           echo "Task Definition ARN: $TASK_DEFINITION"

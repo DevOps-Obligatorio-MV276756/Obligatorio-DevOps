@@ -154,8 +154,8 @@ jobs:
       - name: Push image to AWS ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 555867651264.dkr.ecr.us-east-1.amazonaws.com
-          docker build --build-arg JAR_FILE=${{ env.CALLEE_NAME }}-0.0.1-SNAPSHOT-spring-boot.jar -t ${{ env.CALLEE_NAME }} . --file dockerfile_jar
-          docker tag ${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }} 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
+          docker build --build-arg JAR_FILE=${{ env.CALLEE_NAME }}-0.0.1-SNAPSHOT-spring-boot.jar -t devops/${{ env.CALLEE_NAME }} . --file dockerfile_jar
+          docker tag devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }} 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
           docker push 555867651264.dkr.ecr.us-east-1.amazonaws.com/devops/${{ env.CALLEE_NAME }}:${{ env.CALLEE_BRANCH2 }}
   # Haciendo uso de https://github.com/aws-actions/amazon-ecs-deploy-task-definition
   download_task_deploy_ecs_service:

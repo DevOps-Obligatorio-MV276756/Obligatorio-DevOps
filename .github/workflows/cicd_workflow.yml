@@ -191,6 +191,7 @@ jobs:
     
     # Extraido de ChatGPT | Prompt 1: I want to run aECS Service Update (Rolling Deployment) but first create the service itself through github actions
     # Promt 2: The code you gave me above is not filling task_definition_arn with ${{ steps.register-task-definition.outputs.TASK_DEFINITION }} 
+    # Prompt 3: the argument TASK_DEFINITION_ARN is still being passed as empty
       - name: Register ECS Task Definition
         run: |
           CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
@@ -205,12 +206,12 @@ jobs:
 
           echo "Task Definition ARN: $TASK_DEFINITION"
 
-          echo "::set-output name=task_definition_arn::$TASK_DEFINITION"
+           echo "TASK_DEFINITION_ARN=$TASK_DEFINITION" >> $GITHUB_ENV
       - name: Create ECS Service
         run: |
           CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
           SERVICE_NAME=${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
-          TASK_DEFINITION_ARN=${{ steps.register-task-definition.outputs.task_definition_arn  }}
+          TASK_DEFINITION_ARN=$TASK_DEFINITION_ARN
 
           SERVICE_EXISTS=$(aws ecs describe-services --cluster $CLUSTER_NAME --services $SERVICE_NAME --query 'services[0].serviceName' --output text)
 
@@ -229,7 +230,7 @@ jobs:
         run: |
           CLUSTER_NAME=${{ env.CALLEE_BRANCH2 }}-cluster 
           SERVICE_NAME=${{ env.CALLEE_NAME }}-sv-${{env.CALLEE_BRANCH2}}
-          TASK_DEFINITION_ARN=${{ steps.register-task-definition.outputs.task_definition_arn  }}
+          TASK_DEFINITION_ARN=$TASK_DEFINITION_ARN
 
           # Update ECS service with the new task definition
           aws ecs update-service \
